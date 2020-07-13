@@ -5,6 +5,7 @@ import (
 	simulator "legacy-of-brynjolf/simulator"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -56,9 +57,13 @@ func buildCommands(data string) []simulator.Command {
 func main() {
 	data := readInput()
 	room := simulator.NewRoom(buildRoomState(data))
-	commands := buildCommands(os.Args[1])
+	commands := []simulator.Command{}
+	if len(os.Args) > 1 {
+		commands = buildCommands(os.Args[1])
+	}
 	simulator := simulator.NewRoomSimulator(room)
-	simulator.Simulate(commands)
+	commandsExecuted := simulator.Simulate(commands)
+	simulator.DisplayRoom(string(simulator.Status()) + ": executed " + strconv.Itoa(commandsExecuted) + " commands out of " + strconv.Itoa(len(commands)))
 }
 
 

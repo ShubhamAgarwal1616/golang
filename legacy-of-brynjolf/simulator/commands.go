@@ -24,3 +24,12 @@ func GetValidCommand(c string) (Command, error) {
 		return "", InvalidCommandErr
 	}
 }
+
+func (c Command) getOppositeCommand() Command{
+	switch c {
+	case Up: return Down
+	case Down: return Up
+	case Left: return Right
+	default: return Left
+	}
+}

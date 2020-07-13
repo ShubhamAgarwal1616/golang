@@ -1,6 +1,8 @@
 package simulator
 
-import "strconv"
+import (
+	"fmt"
+)
 
 type simulator interface {
 	simulate(commands []Command)
@@ -10,6 +12,10 @@ type RoomSimulator struct {
 	room Room
 	status RoomStatus
 }
+
+var possibleCommands = []Command{Up, Down, Left, Right}
+var smallestPossibleWayLenth = 0
+var possibleWays = [][]Command{}
 
 func commonPosition(positions []Position, brynjolfPosition Position) bool {
 	for _, position := range positions {
@@ -36,28 +42,85 @@ func (rs *RoomSimulator) wonOrLost() bool {
 	return rs.status == Won || rs.status == Lost
 }
 
-func (rs *RoomSimulator) updateStatus(movableEntitiesPositions []Position, exitPosition []Position) {
+func (rs *RoomSimulator) getupdatedStatus(movableEntitiesPositions []Position, exitPosition []Position) RoomStatus {
 	brynjolfPosition := movableEntitiesPositions[len(movableEntitiesPositions) - 1]
 	guardsPositions := movableEntitiesPositions[0:len(movableEntitiesPositions) - 1]
 	if commonPosition(guardsPositions, brynjolfPosition){
-		rs.status = Lost
+		return Lost
 	}else if commonPosition(exitPosition, brynjolfPosition) {
-		rs.status = Won
+		return Won
 	}
-
+	return Undecided
 }
 
-func (rs *RoomSimulator) Simulate(commands []Command) {
-	movableEntitiesPositions := rs.room.FindEntitiesPosition([]RoomEntity{Guard, Brynjolf})
-	exitPosition := rs.room.FindEntitiesPosition([]RoomEntity{Exit})
-	var commandExecuted int
+func (rs *RoomSimulator) executeCommand(commands []Command, commandExecuted int, movableEntitiesPositions []Position, exitPosition []Position) int {
 	for index, command := range commands {
 		commandExecuted = index + 1
 		rs.room = rs.room.moveEntities(movableEntitiesPositions, command)
-		rs.updateStatus(movableEntitiesPositions, exitPosition)
-		if rs.wonOrLost(){
+		rs.status = rs.getupdatedStatus(movableEntitiesPositions, exitPosition)
+		if rs.wonOrLost() {
 			break
 		}
 	}
-	rs.room.display(string(rs.status) + ": executed " + strconv.Itoa(commandExecuted) + " commands out of " + strconv.Itoa(len(commands)))
+	return commandExecuted
+}
+
+func (rs *RoomSimulator) DisplayRoom(mssg string) {
+	rs.room.display(mssg)
+	fmt.Println("\npossible ways to win")
+	fmt.Println(possibleWays)
+}
+
+func (rs *RoomSimulator) Simulate(commands []Command) int{
+	movableEntitiesPositions := rs.room.FindEntitiesPosition([]RoomEntity{Guard, Brynjolf})
+	exitPosition := rs.room.FindEntitiesPosition([]RoomEntity{Exit})
+	var commandExecuted int
+	commandExecuted = rs.executeCommand(commands, commandExecuted, movableEntitiesPositions, exitPosition)
+	if !rs.wonOrLost() {
+		rs.findPossibleWays(movableEntitiesPositions, exitPosition)
+	}
+	return commandExecuted
+}
+
+//assuming length of smallest possible way is less than 2 * height of room
+func (rs *RoomSimulator) findPossibleWays(movableEntitiesPositions []Position, exitPosition []Position) {
+	smallestPossibleWayLenth = 2 * len(rs.room.state)
+	rs.findWays(rs.room, movableEntitiesPositions, exitPosition, []Command{}, 0)
+	possibleWays = filterWays(possibleWays)
+}
+
+func (rs *RoomSimulator) findWays(room Room, movableEntitiesPositions []Position, exitPosition []Position, previousCommands []Command, levelCount int) {
+	status := rs.getupdatedStatus(movableEntitiesPositions, exitPosition)
+	if status == Won && len(previousCommands) <= smallestPossibleWayLenth{
+		possibleWays = append(possibleWays, append(previousCommands))
+		fmt.Println(possibleWays)
+		smallestPossibleWayLenth = len(previousCommands)
+		return
+	}
+
+	if levelCount > smallestPossibleWayLenth {return}
+
+	for _, command := range possibleCommands {
+		if necessaryMove(previousCommands, command, status) && movableEntitiesNotBlocked(room, movableEntitiesPositions, command){
+			movableEntitiesPositionsCopy := makeCopy(movableEntitiesPositions)
+			newRoom := room.moveEntities(movableEntitiesPositionsCopy, command)
+			rs.findWays(newRoom, movableEntitiesPositionsCopy, exitPosition, append(previousCommands, command), levelCount + 1)
+		}
+	}
+}
+
+func makeCopy(positions []Position) []Position {
+	duplicate := make([]Position, len(positions))
+	copy(duplicate, positions)
+	return duplicate
+}
+
+func filterWays(possibleWays [][]Command) [][]Command {
+	filteredWays := [][]Command{}
+	for _, way := range possibleWays {
+		if len(way) == smallestPossibleWayLenth {
+			filteredWays = append(filteredWays, way)
+		}
+	}
+	return filteredWays
 }
