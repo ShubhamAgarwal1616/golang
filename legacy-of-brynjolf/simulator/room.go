@@ -1,5 +1,7 @@
 package simulator
 
+import "fmt"
+
 type Room struct {
 	state [][]RoomEntity
 }
@@ -82,4 +84,14 @@ func (r Room) FindEntitiesPosition(entities []RoomEntity) []Position{
 		}
 	}
 	return positions
+}
+
+func (r Room) display(mssg string) {
+	fmt.Println(mssg)
+	for _, row := range r.state {
+		for _, entity := range row {
+			fmt.Print(entity + ",")
+		}
+		fmt.Print("\n")
+	}
 }

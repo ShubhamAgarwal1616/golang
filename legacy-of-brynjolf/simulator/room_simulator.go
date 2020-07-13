@@ -1,5 +1,7 @@
 package simulator
 
+import "strconv"
+
 type simulator interface {
 	simulate(commands []Command)
 }
@@ -48,11 +50,14 @@ func (rs *RoomSimulator) updateStatus(movableEntitiesPositions []Position, exitP
 func (rs *RoomSimulator) Simulate(commands []Command) {
 	movableEntitiesPositions := rs.room.FindEntitiesPosition([]RoomEntity{Guard, Brynjolf})
 	exitPosition := rs.room.FindEntitiesPosition([]RoomEntity{Exit})
-	for _, command := range commands {
+	var commandExecuted int
+	for index, command := range commands {
+		commandExecuted = index + 1
 		rs.room = rs.room.moveEntities(movableEntitiesPositions, command)
 		rs.updateStatus(movableEntitiesPositions, exitPosition)
 		if rs.wonOrLost(){
 			break
 		}
 	}
+	rs.room.display(string(rs.status) + ": executed " + strconv.Itoa(commandExecuted) + " commands out of " + strconv.Itoa(len(commands)))
 }
