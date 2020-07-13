@@ -10,7 +10,7 @@ func TestEntities(t *testing.T) {
 
 	checkEntity := func(t *testing.T, got, want simulator.RoomEntity) {
 		t.Helper()
-		if !reflect.DeepEqual(got, want) {
+		if got != want {
 			t.Errorf("got %v want %v", got, want)
 		}
 	}
@@ -40,5 +40,25 @@ func TestEntities(t *testing.T) {
 		_, err := simulator.GetValidCommand("s")
 		assertError(t, err)
 	})
+}
 
+func TestGetBlockingEntities(t *testing.T) {
+	checkBlockingEntities := func(t *testing.T, got, want []simulator.RoomEntity) {
+		t.Helper()
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v", got, want)
+		}
+	}
+
+	t.Run("get wall as blocking entity for brynjolf", func(t *testing.T) {
+		got := simulator.RoomEntity("b").GetBlockingEntities()
+		want := []simulator.RoomEntity{wall}
+		checkBlockingEntities(t, got, want)
+	})
+
+	t.Run("get wall and exit as blocking entity for guard", func(t *testing.T) {
+		got := simulator.RoomEntity("g").GetBlockingEntities()
+		want := []simulator.RoomEntity{wall, exit}
+		checkBlockingEntities(t, got, want)
+	})
 }

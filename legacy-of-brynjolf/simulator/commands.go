@@ -1,6 +1,9 @@
 package simulator
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 type Command string
 
@@ -14,7 +17,7 @@ const (
 var InvalidCommandErr = errors.New("invalid command to execute")
 
 func GetValidCommand(c string) (Command, error) {
-	switch Command(c) {
+	switch Command(strings.ToLower(c)) {
 	case Up, Down, Left, Right:
 		return Command(c), nil
 	default:

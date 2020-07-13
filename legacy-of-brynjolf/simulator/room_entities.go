@@ -2,6 +2,7 @@ package simulator
 
 import (
 	"errors"
+	"strings"
 )
 
 type RoomEntity string
@@ -17,10 +18,18 @@ const (
 var InvalidEntityErr = errors.New("invalid Entity in input file")
 
 func ConvertToRoomEntity(e string) (RoomEntity, error) {
-	switch RoomEntity(e) {
+	switch RoomEntity(strings.ToLower(e)) {
 	case Brynjolf, Guard, Wall, EmptySpace, Exit:
 		return RoomEntity(e), nil
 	default:
 		return "", InvalidEntityErr
+	}
+}
+
+func (e RoomEntity) GetBlockingEntities() []RoomEntity {
+	if e == Guard {
+		return []RoomEntity{Wall, Exit}
+	}else {
+		return []RoomEntity{Wall}
 	}
 }
