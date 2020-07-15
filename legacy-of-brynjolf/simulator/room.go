@@ -2,6 +2,7 @@ package simulator
 
 import (
 	"fmt"
+	"legacy-of-brynjolf/command"
 	"strings"
 )
 
@@ -52,7 +53,7 @@ func (r Room) duplicteRoomState() [][]RoomEntity {
 	return duplicate
 }
 
-func (r Room) moveEntities(positions []Position, command Command) Room {
+func (r Room) moveEntities(positions []Position, command command.Command) Room {
 	newState := r.duplicteRoomState()
 	for index, position := range positions {
 		blockingEntities := position.entity.GetBlockingEntities()
@@ -70,7 +71,7 @@ func (r Room) updateNewState(position Position, newState [][]RoomEntity) {
 	}
 }
 
-func (r Room) moveEntity(position Position, blockingEntities []RoomEntity, newState [][]RoomEntity, command Command) Position {
+func (r Room) moveEntity(position Position, blockingEntities []RoomEntity, newState [][]RoomEntity, command command.Command) Position {
 	for r.notAtEdgeOrBlocked(position, blockingEntities, command) {
 		if position.entity == Brynjolf && (newState[position.row][position.col] == Guard || newState[position.row][position.col] == Exit) {
 			break
@@ -80,15 +81,15 @@ func (r Room) moveEntity(position Position, blockingEntities []RoomEntity, newSt
 	return position
 }
 
-func (r Room) notAtEdgeOrBlocked(position Position, blockingEntities []RoomEntity, command Command) bool {
-	switch command {
-	case Up:
+func (r Room) notAtEdgeOrBlocked(position Position, blockingEntities []RoomEntity, c command.Command) bool {
+	switch c {
+	case command.Up:
 		return position.row > 0 && !includes(blockingEntities, r.state[position.row - 1][position.col])
-	case Down:
+	case command.Down:
 		return position.row < len(r.state) - 1 && !includes(blockingEntities, r.state[position.row + 1][position.col])
-	case Left:
+	case command.Left:
 		return position.col > 0 && !includes(blockingEntities, r.state[position.row][position.col - 1])
-	case Right:
+	case command.Right:
 		return position.col < len(r.state[0]) - 1 && !includes(blockingEntities, r.state[position.row][position.col + 1])
 	}
 	return false

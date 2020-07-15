@@ -1,5 +1,7 @@
 package simulator
 
+import "legacy-of-brynjolf/command"
+
 type Position struct{
 	entity RoomEntity
 	row int
@@ -30,13 +32,13 @@ func (p Position) inclrementCol() Position {
 	return Position{p.entity, p.row, p.col + 1}
 }
 
-func(p Position) update(command Command) Position{
-	switch command {
-	case Up:
+func(p Position) update(c command.Command) Position{
+	switch c {
+	case command.Up:
 		return p.decrementRow()
-	case Down:
+	case command.Down:
 		return p.incrementRow()
-	case Left:
+	case command.Left:
 		return p.decrementCol()
 	default:
 		return p.inclrementCol()

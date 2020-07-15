@@ -1,10 +1,12 @@
 package simulator
 
-var possibleCommands = []Command{Up, Down, Left, Right}
-var smallestPossibleWayLenth = 0
-var possibleWays []Command
+import "legacy-of-brynjolf/command"
 
-func movableEntitiesNotBlocked(room Room, positions []Position, command Command) bool {
+var possibleCommands = []command.Command{command.Up, command.Down, command.Left, command.Right}
+var smallestPossibleWayLenth = 0
+var possibleWays []command.Command
+
+func movableEntitiesNotBlocked(room Room, positions []Position, command command.Command) bool {
 	for _, position := range positions {
 		blockingEntities := position.entity.GetBlockingEntities()
 		if room.notAtEdgeOrBlocked(position, blockingEntities, command){
@@ -14,7 +16,7 @@ func movableEntitiesNotBlocked(room Room, positions []Position, command Command)
 	return false
 }
 
-func previousMove(previousCommands Command, comand Command) bool {
+func previousMove(previousCommands command.Command, comand command.Command) bool {
 	if len(previousCommands) > 0 {
 		return previousCommands[len(previousCommands)-1:] == comand
 
@@ -27,8 +29,8 @@ func wonOrLost(status RoomStatus) bool {
 	return status == Lost || status == Won
 }
 
-func formingPattern(previousCommands Command, comand Command) bool {
-	oppositeCommand := comand.getOppositeCommand()
+func formingPattern(previousCommands command.Command, comand command.Command) bool {
+	oppositeCommand := comand.OppositeCommand()
 	length := len(previousCommands)
 	if length > 1 {
 		return previousCommands[length - 2:] == comand + oppositeCommand
@@ -36,7 +38,7 @@ func formingPattern(previousCommands Command, comand Command) bool {
 	return false
 }
 
-func necessaryMove(previousCommands Command, comand Command, status RoomStatus) bool {
+func necessaryMove(previousCommands command.Command, comand command.Command, status RoomStatus) bool {
 	return (!previousMove(previousCommands, comand)) && (!wonOrLost(status)) && (!formingPattern(previousCommands, comand))
 }
 
@@ -62,13 +64,13 @@ func getRoomStatus(movableEntitiesPositions []Position, exitPosition []Position)
 
 
 //assuming length of smallest possible way is less than 2 * height of room
-func findPossibleWays(rs RoomSimulator, movableEntitiesPositions []Position, exitPosition []Position) []Command {
+func findPossibleWays(rs RoomSimulator, movableEntitiesPositions []Position, exitPosition []Position) []command.Command {
 	smallestPossibleWayLenth = 2 * len(rs.room.state)
-	findWays(rs.room, movableEntitiesPositions, exitPosition, Command(""), 0)
+	findWays(rs.room, movableEntitiesPositions, exitPosition, command.Command(""), 0)
 	return filterWays(possibleWays)
 }
 
-func findWays(room Room, movableEntitiesPositions []Position, exitPosition []Position, previousCommands Command, levelCount int) {
+func findWays(room Room, movableEntitiesPositions []Position, exitPosition []Position, previousCommands command.Command, levelCount int) {
 	status := getRoomStatus(movableEntitiesPositions, exitPosition)
 	if status == Won && len(previousCommands) <= smallestPossibleWayLenth {
 		possibleWays = append(possibleWays, previousCommands)
@@ -93,8 +95,8 @@ func makeCopy(positions []Position) []Position {
 	return duplicate
 }
 
-func filterWays(possibleWays []Command) []Command {
-	filteredWays := []Command{}
+func filterWays(possibleWays []command.Command) []command.Command {
+	filteredWays := []command.Command{}
 	for _, way := range possibleWays {
 		if len(way) == smallestPossibleWayLenth {
 			filteredWays = append(filteredWays, way)

@@ -2,11 +2,12 @@ package simulator
 
 import (
 	"fmt"
+	"legacy-of-brynjolf/command"
 	"strconv"
 )
 
 type simulator interface {
-	simulate(commands []Command)
+	simulate(commands []command.Command)
 }
 
 type RoomSimulator struct {
@@ -18,7 +19,7 @@ func NewRoomSimulator(room Room) RoomSimulator {
 	return RoomSimulator{room: room, status: Undecided}
 }
 
-func Simulate(room Room, commands []Command) {
+func Simulate(room Room, commands []command.Command) {
 	simulator := NewRoomSimulator(room)
 	commandsExecuted, ways := simulator.Start(commands)
 	mssg := string(simulator.Status()) + ": executed " + strconv.Itoa(commandsExecuted) + " commands out of " + strconv.Itoa(len(commands))
@@ -33,7 +34,7 @@ func (rs *RoomSimulator) Status() RoomStatus {
 	return rs.status
 }
 
-func (rs *RoomSimulator) DisplayRoom(mssg string, ways []Command) {
+func (rs *RoomSimulator) DisplayRoom(mssg string, ways []command.Command) {
 	rs.room.display(mssg)
 	fmt.Println("\npossible ways to win")
 	fmt.Println(ways)
@@ -43,7 +44,7 @@ func (rs *RoomSimulator) wonOrLost() bool {
 	return rs.status == Won || rs.status == Lost
 }
 
-func (rs *RoomSimulator) executeCommand(commands []Command, commandExecuted int, movableEntitiesPositions []Position, exitPosition []Position) int {
+func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecuted int, movableEntitiesPositions []Position, exitPosition []Position) int {
 	for index, command := range commands {
 		commandExecuted = index + 1
 		rs.room = rs.room.moveEntities(movableEntitiesPositions, command)
@@ -55,12 +56,12 @@ func (rs *RoomSimulator) executeCommand(commands []Command, commandExecuted int,
 	return commandExecuted
 }
 
-func (rs *RoomSimulator) Start(commands []Command) (int, []Command){
+func (rs *RoomSimulator) Start(commands []command.Command) (int, []command.Command){
 	movableEntitiesPositions := rs.room.FindEntitiesPosition([]RoomEntity{Guard, Brynjolf})
 	exitPosition := rs.room.FindEntitiesPosition([]RoomEntity{Exit})
 	var commandsExecuted int
 	commandsExecuted = rs.executeCommand(commands, commandsExecuted, movableEntitiesPositions, exitPosition)
-	var ways []Command
+	var ways []command.Command
 	if !rs.wonOrLost() {
 		ways = findPossibleWays(*rs, movableEntitiesPositions, exitPosition)
 	}

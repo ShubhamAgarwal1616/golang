@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"legacy-of-brynjolf/command"
 	simulator "legacy-of-brynjolf/simulator"
 	"log"
 	"os"
@@ -17,27 +18,18 @@ func readInput() string {
 	return string(data)
 }
 
-func buildCommands(data string) []simulator.Command {
-	var commands []simulator.Command
-	for _, char := range data {
-		command, err := simulator.GetValidCommand(string(char))
-		if err != nil {
-			log.Fatal(err)
-		}
-		commands = append(commands, command)
-	}
-	return commands
-}
-
 func main() {
 	data := readInput()
 	room, err := simulator.NewRoom(data)
 	if err != nil {
 		log.Fatal(err)
 	}
-	commands := []simulator.Command{}
-	if len(os.Args) > 1 {
-		commands = buildCommands(os.Args[1])
+	var commands []command.Command
+	if len(os.Args) > 1{
+		commands, err = command.Build(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	simulator.Simulate(room, commands)
 }

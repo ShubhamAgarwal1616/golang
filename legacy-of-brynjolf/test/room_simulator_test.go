@@ -1,6 +1,7 @@
 package test
 
 import (
+	"legacy-of-brynjolf/command"
 	"legacy-of-brynjolf/simulator"
 	"reflect"
 	"testing"
@@ -28,7 +29,7 @@ func TestSimulate(t *testing.T) {
 		data = "0,x,0,x\n0,b,0,e\n0,0,0,0\nx,0,0,0"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Up})
+		roomSimulator.Start([]command.Command{command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
@@ -41,7 +42,7 @@ func TestSimulate(t *testing.T) {
 		data = "0,x,0,x\n0,g,0,e\n0,0,0,0\nx,0,0,0"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Up})
+		roomSimulator.Start([]command.Command{command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Lost)
@@ -54,7 +55,7 @@ func TestSimulate(t *testing.T) {
 		data = "0,x,0,x\n0,g,0,e\n0,0,0,0\nx,0,0,0"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Up})
+		roomSimulator.Start([]command.Command{command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Won)
@@ -67,7 +68,7 @@ func TestSimulate(t *testing.T) {
 		data = "0,x,g,0\n0,0,0,e\n0,0,0,0\nx,b,0,0"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Left})
+		roomSimulator.Start([]command.Command{command.Left})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
@@ -80,7 +81,7 @@ func TestSimulate(t *testing.T) {
 		data = "0,x,0,g\n0,0,g,e\n0,0,0,0\nx,0,0,b"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Right})
+		roomSimulator.Start([]command.Command{command.Right})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
@@ -93,7 +94,7 @@ func TestSimulate(t *testing.T) {
 		data = "0,x,0,g\n0,0,0,e\ng,0,0,0\nx,b,0,0"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Down})
+		roomSimulator.Start([]command.Command{command.Down})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
@@ -106,7 +107,7 @@ func TestSimulate(t *testing.T) {
 		data = "0,x,g,g\n0,0,0,e\n0,0,0,0\nx,0,0,0"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Right, simulator.Up})
+		roomSimulator.Start([]command.Command{command.Right, command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Won)
@@ -119,7 +120,7 @@ func TestSimulate(t *testing.T) {
 		data = "g,x,0,0\n0,0,0,e\n0,0,0,0\n0,0,0,0"
 		want, _ := simulator.NewRoom(data)
 
-		roomSimulator.Start([]simulator.Command{simulator.Left, simulator.Up})
+		roomSimulator.Start([]command.Command{command.Left, command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Lost)

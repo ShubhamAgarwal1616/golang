@@ -37,7 +37,7 @@ func TestEntities(t *testing.T) {
 	})
 
 	t.Run("got an error for invalid entity", func(t *testing.T) {
-		_, err := simulator.GetValidCommand("s")
+		_, err := simulator.ConvertToRoomEntity("s")
 		assertError(t, err)
 	})
 }
