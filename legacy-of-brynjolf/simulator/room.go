@@ -1,13 +1,37 @@
 package simulator
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Room struct {
 	state [][]RoomEntity
 }
 
-func NewRoom(state [][]RoomEntity) Room {
-	return Room{state: state}
+func buildRow(cols []string) ([]RoomEntity, error) {
+	var entityRow []RoomEntity
+	for _, entity := range cols {
+		entity, err := ConvertToRoomEntity(entity)
+		if err != nil {
+			return nil, err
+		}
+		entityRow = append(entityRow, entity)
+	}
+	return entityRow, nil
+}
+
+func NewRoom(data string) (Room, error) {
+	var state [][]RoomEntity
+	rows := strings.Split(strings.TrimSpace(data), "\n")
+	for _, row := range rows {
+		entityRow, err := buildRow(strings.Split(strings.TrimSpace(row), ","))
+		if err != nil{
+			return Room{}, err
+		}
+		state = append(state, entityRow)
+	}
+	return Room{state: state}, nil
 }
 
 func includes(entities []RoomEntity, entity RoomEntity) bool {
@@ -37,7 +61,7 @@ func (r Room) moveEntities(positions []Position, command Command) Room {
 		r.updateNewState(position, newState)
 		positions[index] = position
 	}
-	return NewRoom(newState)
+	return Room{newState}
 }
 
 func (r Room) updateNewState(position Position, newState [][]RoomEntity) {

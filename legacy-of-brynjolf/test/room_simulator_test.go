@@ -22,121 +22,105 @@ func TestSimulate(t *testing.T) {
 	}
 
 	t.Run("expect brynjolf to move in upward direction till a wall comes up", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,wall},
-														   {space,space,space,exit},
-														   {space,brynjolf,space,space},
-														   {wall,space,space,space}})
+		data := "0,x,0,x\n0,0,0,e\n0,b,0,0\nx,0,0,0"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Up})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,wall},
-														      {space,brynjolf,space,exit},
-														      {space,space,space,space},
-														      {wall,space,space,space}})
+		data = "0,x,0,x\n0,b,0,e\n0,0,0,0\nx,0,0,0"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Up})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
 	})
 
 	t.Run("expect brynjolf to move in upward direction and caught by a guard", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,wall},
-														   {space,guard,space,exit},
-														   {space,space,space,space},
-														   {wall,brynjolf,space,space}})
+		data := "0,x,0,x\n0,g,0,e\n0,0,0,0\nx,b,0,0"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Up})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,wall},
-															  {space,guard,space,exit},
-															  {space,space,space,space},
-															  {wall,space,space,space}})
+		data = "0,x,0,x\n0,g,0,e\n0,0,0,0\nx,0,0,0"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Up})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Lost)
 	})
 
 	t.Run("expect brynjolf to move in upward direction and exit the room", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,wall},
-														   {space,space,space,exit},
-														   {space,space,space,space},
-														   {wall,guard,space,brynjolf}})
+		data := "0,x,0,x\n0,0,0,e\n0,0,0,0\nx,g,0,b"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Up})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,wall},
-															  {space,guard,space,exit},
-															  {space,space,space,space},
-															  {wall,space,space,space}})
+		data = "0,x,0,x\n0,g,0,e\n0,0,0,0\nx,0,0,0"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Up})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Won)
 	})
 
 	t.Run("expect brynjolf and guards to move in left direction", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,guard},
-														   {space,space,space,exit},
-														   {space,space,space,space},
-														   {wall,space,space,brynjolf}})
+		data := "0,x,0,g\n0,0,0,e\n0,0,0,0\nx,0,0,b"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Left})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,guard,space},
-														   {space,space,space,exit},
-														   {space,space,space,space},
-														   {wall,brynjolf,space,space}})
+		data = "0,x,g,0\n0,0,0,e\n0,0,0,0\nx,b,0,0"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Left})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
 	})
 
 	t.Run("expect brynjolf and guards to move in right direction", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,guard},
-								 						   {guard,space,space,exit},
-								 						   {space,space,space,space},
-								 						   {wall,brynjolf,space,space}})
+		data := "0,x,0,g\ng,0,0,e\n0,0,0,0\nx,b,0,0"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Right})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,guard},
-														   {space,space,guard,exit},
-														   {space,space,space,space},
-														   {wall,space,space,brynjolf}})
+		data = "0,x,0,g\n0,0,g,e\n0,0,0,0\nx,0,0,b"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Right})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
 	})
 
 	t.Run("expect brynjolf and guards to move in downward direction", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,guard},
-														   {guard,brynjolf,space,exit},
-														   {space,space,space,space},
-														   {wall,space,space,space}})
+		data := "0,x,0,g\ng,b,0,e\n0,0,0,0\nx,0,0,0"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Down})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,guard},
-														   {space,space,space,exit},
-														   {guard,space,space,space},
-														   {wall,brynjolf,space,space}})
+		data = "0,x,0,g\n0,0,0,e\ng,0,0,0\nx,b,0,0"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Down})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
 	})
 
 	t.Run("expect brynjolf to win on execution of ru", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,guard},
-														   {guard,space,space,exit},
-														   {space,space,space,space},
-														   {wall,brynjolf,space,space}})
+		data := "0,x,0,g\ng,0,0,e\n0,0,0,0\nx,b,0,0"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Right, simulator.Up})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,guard,guard},
-														   {space,space,space,exit},
-														   {space,space,space,space},
-														   {wall,space,space,space}})
+		data = "0,x,g,g\n0,0,0,e\n0,0,0,0\nx,0,0,0"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Right, simulator.Up})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Won)
 	})
 
 	t.Run("expect brynjolf to lose on execution of lu", func(t *testing.T) {
-		room := simulator.NewRoom([][]simulator.RoomEntity{{space, wall,space,space},
-														   {guard,space,space,exit},
-														   {space,space,space,guard},
-														   {space,space,space,brynjolf}})
+		data := "0,x,0,0\ng,0,0,e\n0,0,0,g\n0,0,0,b"
+		room, _ := simulator.NewRoom(data)
 		roomSimulator := simulator.NewRoomSimulator(room)
-		roomSimulator.Simulate([]simulator.Command{simulator.Left, simulator.Up})
-		want := simulator.NewRoom([][]simulator.RoomEntity{{guard, wall,space,space},
-														   {space,space,space,exit},
-														   {space,space,space,space},
-														   {space,space,space,space}})
+		data = "g,x,0,0\n0,0,0,e\n0,0,0,0\n0,0,0,0"
+		want, _ := simulator.NewRoom(data)
+
+		roomSimulator.Start([]simulator.Command{simulator.Left, simulator.Up})
+
 		assertRoomState(t, roomSimulator.Room(), want)
 		assertStatus(t, roomSimulator.Status(), simulator.Lost)
 	})
