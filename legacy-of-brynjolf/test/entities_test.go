@@ -1,14 +1,14 @@
 package test
 
 import (
-	"legacy-of-brynjolf/entities"
+	"legacy-of-brynjolf/room/entities"
 	"reflect"
 	"testing"
 )
 
 func TestEntities(t *testing.T) {
 
-	checkEntity := func(t *testing.T, got, want entities.RoomEntity) {
+	checkEntity := func(t *testing.T, got, want entities.Entity) {
 		t.Helper()
 		if got != want {
 			t.Errorf("got %v want %v", got, want)
@@ -31,7 +31,7 @@ func TestEntities(t *testing.T) {
 
 	t.Run("get a valid entitty", func(t *testing.T) {
 		got, err := entities.BuildEntity("b")
-		want := entities.RoomEntity("b")
+		want := entities.Entity("b")
 		checkEntity(t, got, want)
 		assertNoError(t, err)
 	})
@@ -43,7 +43,7 @@ func TestEntities(t *testing.T) {
 }
 
 func TestGetBlockingEntities(t *testing.T) {
-	checkBlockingEntities := func(t *testing.T, got, want []entities.RoomEntity) {
+	checkBlockingEntities := func(t *testing.T, got, want []entities.Entity) {
 		t.Helper()
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v want %v", got, want)
@@ -51,14 +51,14 @@ func TestGetBlockingEntities(t *testing.T) {
 	}
 
 	t.Run("get wall as blocking entity for brynjolf", func(t *testing.T) {
-		got := entities.RoomEntity("b").GetBlockingEntities()
-		want := []entities.RoomEntity{wall}
+		got := entities.Entity("b").GetBlockingEntities()
+		want := []entities.Entity{wall}
 		checkBlockingEntities(t, got, want)
 	})
 
 	t.Run("get wall and exit as blocking entity for guard", func(t *testing.T) {
-		got := entities.RoomEntity("g").GetBlockingEntities()
-		want := []entities.RoomEntity{wall, exit}
+		got := entities.Entity("g").GetBlockingEntities()
+		want := []entities.Entity{wall, exit}
 		checkBlockingEntities(t, got, want)
 	})
 }

@@ -2,16 +2,16 @@ package position
 
 import (
 	"legacy-of-brynjolf/command"
-	"legacy-of-brynjolf/entities"
+	"legacy-of-brynjolf/room/entities"
 )
 
 type Position struct{
-	entity entities.RoomEntity
+	entity entities.Entity
 	row    int
 	col    int
 }
 
-func NewPostion(entity entities.RoomEntity, row int, col int) Position {
+func NewPostion(entity entities.Entity, row int, col int) Position {
 	return Position{
 		entity: entity,
 		row: row,
@@ -19,7 +19,7 @@ func NewPostion(entity entities.RoomEntity, row int, col int) Position {
 	}
 }
 
-func (p Position) Entity() entities.RoomEntity { return p.entity }
+func (p Position) Entity() entities.Entity { return p.entity }
 
 func (p Position) Row() int { return p.row }
 

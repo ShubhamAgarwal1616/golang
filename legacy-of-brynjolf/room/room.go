@@ -3,17 +3,17 @@ package room
 import (
 	"fmt"
 	"legacy-of-brynjolf/command"
-	"legacy-of-brynjolf/entities"
 	"legacy-of-brynjolf/position"
+	"legacy-of-brynjolf/room/entities"
 	"strings"
 )
 
 type Room struct {
-	state [][]entities.RoomEntity
+	state [][]entities.Entity
 }
 
-func buildRow(cols []string) ([]entities.RoomEntity, error) {
-	var entityRow []entities.RoomEntity
+func buildRow(cols []string) ([]entities.Entity, error) {
+	var entityRow []entities.Entity
 	for _, entity := range cols {
 		entity, err := entities.BuildEntity(entity)
 		if err != nil {
@@ -25,7 +25,7 @@ func buildRow(cols []string) ([]entities.RoomEntity, error) {
 }
 
 func NewRoom(data string) (Room, error) {
-	var state [][]entities.RoomEntity
+	var state [][]entities.Entity
 	rows := strings.Split(strings.TrimSpace(data), "\n")
 	for _, row := range rows {
 		entityRow, err := buildRow(strings.Split(strings.TrimSpace(row), ","))
@@ -37,7 +37,7 @@ func NewRoom(data string) (Room, error) {
 	return Room{state: state}, nil
 }
 
-func includes(entities []entities.RoomEntity, entity entities.RoomEntity) bool {
+func includes(entities []entities.Entity, entity entities.Entity) bool {
 	for _, e := range entities{
 		if e == entity{
 			return true
@@ -50,10 +50,10 @@ func (r Room) Size() int {
 	return len(r.state)
 }
 
-func (r Room) duplicteRoomState() [][]entities.RoomEntity {
-	duplicate := make([][]entities.RoomEntity, len(r.state))
+func (r Room) duplicteRoomState() [][]entities.Entity {
+	duplicate := make([][]entities.Entity, len(r.state))
 	for index := range r.state {
-		duplicate[index] = make([]entities.RoomEntity, len(r.state[index]))
+		duplicate[index] = make([]entities.Entity, len(r.state[index]))
 		copy(duplicate[index], r.state[index])
 	}
 	return duplicate
@@ -71,13 +71,13 @@ func (r Room) MoveEntities(positions []position.Position, command command.Comman
 	return Room{newState}
 }
 
-func (r Room) updateNewState(pos position.Position, newState [][]entities.RoomEntity) {
+func (r Room) updateNewState(pos position.Position, newState [][]entities.Entity) {
 	if r.state[pos.Row()][pos.Col()] != entities.Exit && !(pos.Entity() == entities.Brynjolf && newState[pos.Row()][pos.Col()] == entities.Guard) {
 		newState[pos.Row()][pos.Col()] = pos.Entity()
 	}
 }
 
-func (r Room) moveEntity(pos position.Position, blockingEntities []entities.RoomEntity, newState [][]entities.RoomEntity, command command.Command) position.Position {
+func (r Room) moveEntity(pos position.Position, blockingEntities []entities.Entity, newState [][]entities.Entity, command command.Command) position.Position {
 	for r.NotAtEdgeOrBlocked(pos, blockingEntities, command) {
 		if pos.Entity() == entities.Brynjolf && (newState[pos.Row()][pos.Col()] == entities.Guard || newState[pos.Row()][pos.Col()] == entities.Exit) {
 			break
@@ -87,7 +87,7 @@ func (r Room) moveEntity(pos position.Position, blockingEntities []entities.Room
 	return pos
 }
 
-func (r Room) NotAtEdgeOrBlocked(pos position.Position, blockingEntities []entities.RoomEntity, c command.Command) bool {
+func (r Room) NotAtEdgeOrBlocked(pos position.Position, blockingEntities []entities.Entity, c command.Command) bool {
 	switch c {
 	case command.Up:
 		return pos.Row() > 0 && !includes(blockingEntities, r.state[pos.Row() - 1][pos.Col()])
@@ -101,7 +101,7 @@ func (r Room) NotAtEdgeOrBlocked(pos position.Position, blockingEntities []entit
 	return false
 }
 
-func (r Room) FindEntitiesPosition(e []entities.RoomEntity) []position.Position {
+func (r Room) FindEntitiesPosition(e []entities.Entity) []position.Position {
 	var positions []position.Position
 	for row, entitiesInRow := range r.state {
 		for col, entity := range entitiesInRow {

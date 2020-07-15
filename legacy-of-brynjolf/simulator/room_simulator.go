@@ -3,10 +3,10 @@ package simulator
 import (
 	"fmt"
 	"legacy-of-brynjolf/command"
-	"legacy-of-brynjolf/entities"
 	"legacy-of-brynjolf/path"
 	"legacy-of-brynjolf/position"
 	room2 "legacy-of-brynjolf/room"
+	"legacy-of-brynjolf/room/entities"
 	status2 "legacy-of-brynjolf/status"
 	"strconv"
 )
@@ -58,8 +58,8 @@ func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecu
 }
 
 func (rs *RoomSimulator) Start(commands []command.Command) (int, []command.Command){
-	movableEntitiesPositions := rs.room.FindEntitiesPosition([]entities.RoomEntity{entities.Guard, entities.Brynjolf})
-	exitPosition := rs.room.FindEntitiesPosition([]entities.RoomEntity{entities.Exit})
+	movableEntitiesPositions := rs.room.FindEntitiesPosition([]entities.Entity{entities.Guard, entities.Brynjolf})
+	exitPosition := rs.room.FindEntitiesPosition([]entities.Entity{entities.Exit})
 	var commandsExecuted int
 	commandsExecuted = rs.executeCommand(commands, commandsExecuted, movableEntitiesPositions, exitPosition)
 	var ways []command.Command
