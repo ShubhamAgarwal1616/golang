@@ -3,6 +3,7 @@ package test
 import (
 	"legacy-of-brynjolf/command"
 	"legacy-of-brynjolf/simulator"
+	"legacy-of-brynjolf/status"
 	"reflect"
 	"testing"
 )
@@ -15,7 +16,7 @@ func TestSimulate(t *testing.T) {
 		}
 	}
 
-	assertStatus := func(t *testing.T, got, want simulator.RoomStatus) {
+	assertStatus := func(t *testing.T, got, want status.RoomStatus) {
 		t.Helper()
 		if got != want {
 			t.Errorf("got %v want %v", got, want)
@@ -32,7 +33,7 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
+		assertStatus(t, roomSimulator.Status(), status.Undecided)
 	})
 
 	t.Run("expect brynjolf to move in upward direction and caught by a guard", func(t *testing.T) {
@@ -45,7 +46,7 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Lost)
+		assertStatus(t, roomSimulator.Status(), status.Lost)
 	})
 
 	t.Run("expect brynjolf to move in upward direction and exit the room", func(t *testing.T) {
@@ -58,7 +59,7 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Won)
+		assertStatus(t, roomSimulator.Status(), status.Won)
 	})
 
 	t.Run("expect brynjolf and guards to move in left direction", func(t *testing.T) {
@@ -71,7 +72,7 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Left})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
+		assertStatus(t, roomSimulator.Status(), status.Undecided)
 	})
 
 	t.Run("expect brynjolf and guards to move in right direction", func(t *testing.T) {
@@ -84,7 +85,7 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Right})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
+		assertStatus(t, roomSimulator.Status(), status.Undecided)
 	})
 
 	t.Run("expect brynjolf and guards to move in downward direction", func(t *testing.T) {
@@ -97,7 +98,7 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Down})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Undecided)
+		assertStatus(t, roomSimulator.Status(), status.Undecided)
 	})
 
 	t.Run("expect brynjolf to win on execution of ru", func(t *testing.T) {
@@ -110,7 +111,7 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Right, command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Won)
+		assertStatus(t, roomSimulator.Status(), status.Won)
 	})
 
 	t.Run("expect brynjolf to lose on execution of lu", func(t *testing.T) {
@@ -123,6 +124,6 @@ func TestSimulate(t *testing.T) {
 		roomSimulator.Start([]command.Command{command.Left, command.Up})
 
 		assertRoomState(t, roomSimulator.Room(), want)
-		assertStatus(t, roomSimulator.Status(), simulator.Lost)
+		assertStatus(t, roomSimulator.Status(), status.Lost)
 	})
 }

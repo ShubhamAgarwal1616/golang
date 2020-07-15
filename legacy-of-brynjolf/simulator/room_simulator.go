@@ -3,20 +3,18 @@ package simulator
 import (
 	"fmt"
 	"legacy-of-brynjolf/command"
+	"legacy-of-brynjolf/entities"
+	status2 "legacy-of-brynjolf/status"
 	"strconv"
 )
 
-type simulator interface {
-	simulate(commands []command.Command)
-}
-
 type RoomSimulator struct {
-	room Room
-	status RoomStatus
+	room   Room
+	status status2.RoomStatus
 }
 
 func NewRoomSimulator(room Room) RoomSimulator {
-	return RoomSimulator{room: room, status: Undecided}
+	return RoomSimulator{room: room, status: status2.Undecided}
 }
 
 func Simulate(room Room, commands []command.Command) {
@@ -30,7 +28,7 @@ func (rs *RoomSimulator) Room() Room {
 	return rs.room
 }
 
-func (rs *RoomSimulator) Status() RoomStatus {
+func (rs *RoomSimulator) Status() status2.RoomStatus {
 	return rs.status
 }
 
@@ -41,13 +39,13 @@ func (rs *RoomSimulator) DisplayRoom(mssg string, ways []command.Command) {
 }
 
 func (rs *RoomSimulator) wonOrLost() bool {
-	return rs.status == Won || rs.status == Lost
+	return rs.status == status2.Won || rs.status == status2.Lost
 }
 
 func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecuted int, movableEntitiesPositions []Position, exitPosition []Position) int {
-	for index, command := range commands {
+	for index, cmd := range commands {
 		commandExecuted = index + 1
-		rs.room = rs.room.moveEntities(movableEntitiesPositions, command)
+		rs.room = rs.room.moveEntities(movableEntitiesPositions, cmd)
 		rs.status = getRoomStatus(movableEntitiesPositions, exitPosition)
 		if rs.wonOrLost() {
 			break
@@ -57,8 +55,8 @@ func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecu
 }
 
 func (rs *RoomSimulator) Start(commands []command.Command) (int, []command.Command){
-	movableEntitiesPositions := rs.room.FindEntitiesPosition([]RoomEntity{Guard, Brynjolf})
-	exitPosition := rs.room.FindEntitiesPosition([]RoomEntity{Exit})
+	movableEntitiesPositions := rs.room.FindEntitiesPosition([]entities.RoomEntity{entities.Guard, entities.Brynjolf})
+	exitPosition := rs.room.FindEntitiesPosition([]entities.RoomEntity{entities.Exit})
 	var commandsExecuted int
 	commandsExecuted = rs.executeCommand(commands, commandsExecuted, movableEntitiesPositions, exitPosition)
 	var ways []command.Command

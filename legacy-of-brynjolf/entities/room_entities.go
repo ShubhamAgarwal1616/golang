@@ -1,4 +1,4 @@
-package simulator
+package entities
 
 import (
 	"errors"
@@ -17,7 +17,7 @@ const (
 
 var InvalidEntityErr = errors.New("invalid Entity in input file")
 
-func ConvertToRoomEntity(e string) (RoomEntity, error) {
+func BuildEntity(e string) (RoomEntity, error) {
 	switch RoomEntity(strings.ToLower(e)) {
 	case Brynjolf, Guard, Wall, EmptySpace, Exit:
 		return RoomEntity(e), nil

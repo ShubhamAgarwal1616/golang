@@ -1,6 +1,9 @@
 package simulator
 
-import "legacy-of-brynjolf/command"
+import (
+	"legacy-of-brynjolf/command"
+	"legacy-of-brynjolf/status"
+)
 
 var possibleCommands = []command.Command{command.Up, command.Down, command.Left, command.Right}
 var smallestPossibleWayLenth = 0
@@ -25,8 +28,8 @@ func previousMove(previousCommands command.Command, comand command.Command) bool
 }
 
 
-func wonOrLost(status RoomStatus) bool {
-	return status == Lost || status == Won
+func wonOrLost(s status.RoomStatus) bool {
+	return s == status.Lost || s == status.Won
 }
 
 func formingPattern(previousCommands command.Command, comand command.Command) bool {
@@ -38,7 +41,7 @@ func formingPattern(previousCommands command.Command, comand command.Command) bo
 	return false
 }
 
-func necessaryMove(previousCommands command.Command, comand command.Command, status RoomStatus) bool {
+func necessaryMove(previousCommands command.Command, comand command.Command, status status.RoomStatus) bool {
 	return (!previousMove(previousCommands, comand)) && (!wonOrLost(status)) && (!formingPattern(previousCommands, comand))
 }
 
@@ -51,28 +54,28 @@ func commonPosition(positions []Position, brynjolfPosition Position) bool {
 	return false
 }
 
-func getRoomStatus(movableEntitiesPositions []Position, exitPosition []Position) RoomStatus {
+func getRoomStatus(movableEntitiesPositions []Position, exitPosition []Position) status.RoomStatus {
 	brynjolfPosition := movableEntitiesPositions[len(movableEntitiesPositions) - 1]
 	guardsPositions := movableEntitiesPositions[0:len(movableEntitiesPositions) - 1]
 	if commonPosition(guardsPositions, brynjolfPosition){
-		return Lost
+		return status.Lost
 	}else if commonPosition(exitPosition, brynjolfPosition) {
-		return Won
+		return status.Won
 	}
-	return Undecided
+	return status.Undecided
 }
 
 
 //assuming length of smallest possible way is less than 2 * height of room
 func findPossibleWays(rs RoomSimulator, movableEntitiesPositions []Position, exitPosition []Position) []command.Command {
 	smallestPossibleWayLenth = 2 * len(rs.room.state)
-	findWays(rs.room, movableEntitiesPositions, exitPosition, command.Command(""), 0)
+	findWays(rs.room, movableEntitiesPositions, exitPosition, "", 0)
 	return filterWays(possibleWays)
 }
 
 func findWays(room Room, movableEntitiesPositions []Position, exitPosition []Position, previousCommands command.Command, levelCount int) {
-	status := getRoomStatus(movableEntitiesPositions, exitPosition)
-	if status == Won && len(previousCommands) <= smallestPossibleWayLenth {
+	newStatus := getRoomStatus(movableEntitiesPositions, exitPosition)
+	if newStatus == status.Won && len(previousCommands) <= smallestPossibleWayLenth {
 		possibleWays = append(possibleWays, previousCommands)
 		smallestPossibleWayLenth = len(previousCommands)
 		return
@@ -80,11 +83,11 @@ func findWays(room Room, movableEntitiesPositions []Position, exitPosition []Pos
 
 	if levelCount > smallestPossibleWayLenth {return}
 
-	for _, command := range possibleCommands {
-		if necessaryMove(previousCommands, command, status) && movableEntitiesNotBlocked(room, movableEntitiesPositions, command){
+	for _, cmd := range possibleCommands {
+		if necessaryMove(previousCommands, cmd, newStatus) && movableEntitiesNotBlocked(room, movableEntitiesPositions, cmd){
 			movableEntitiesPositionsCopy := makeCopy(movableEntitiesPositions)
-			newRoom := room.moveEntities(movableEntitiesPositionsCopy, command)
-			findWays(newRoom, movableEntitiesPositionsCopy, exitPosition, previousCommands + command, levelCount + 1)
+			newRoom := room.moveEntities(movableEntitiesPositionsCopy, cmd)
+			findWays(newRoom, movableEntitiesPositionsCopy, exitPosition, previousCommands +cmd, levelCount + 1)
 		}
 	}
 }
@@ -96,7 +99,7 @@ func makeCopy(positions []Position) []Position {
 }
 
 func filterWays(possibleWays []command.Command) []command.Command {
-	filteredWays := []command.Command{}
+	var filteredWays []command.Command
 	for _, way := range possibleWays {
 		if len(way) == smallestPossibleWayLenth {
 			filteredWays = append(filteredWays, way)

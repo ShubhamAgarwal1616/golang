@@ -1,14 +1,17 @@
 package simulator
 
-import "legacy-of-brynjolf/command"
+import (
+	"legacy-of-brynjolf/command"
+	"legacy-of-brynjolf/entities"
+)
 
 type Position struct{
-	entity RoomEntity
-	row int
-	col int
+	entity entities.RoomEntity
+	row    int
+	col    int
 }
 
-func NewPostion(entity RoomEntity, row int, col int) Position {
+func NewPostion(entity entities.RoomEntity, row int, col int) Position {
 	return Position{
 		entity: entity,
 		row: row,
