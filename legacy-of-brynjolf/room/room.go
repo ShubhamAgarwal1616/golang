@@ -1,4 +1,4 @@
-package simulator
+package room
 
 import (
 	"fmt"
@@ -46,6 +46,10 @@ func includes(entities []entities.RoomEntity, entity entities.RoomEntity) bool {
 	return false
 }
 
+func (r Room) Size() int {
+	return len(r.state)
+}
+
 func (r Room) duplicteRoomState() [][]entities.RoomEntity {
 	duplicate := make([][]entities.RoomEntity, len(r.state))
 	for index := range r.state {
@@ -55,7 +59,7 @@ func (r Room) duplicteRoomState() [][]entities.RoomEntity {
 	return duplicate
 }
 
-func (r Room) moveEntities(positions []position.Position, command command.Command) Room {
+func (r Room) MoveEntities(positions []position.Position, command command.Command) Room {
 	newState := r.duplicteRoomState()
 	for index, pos := range positions {
 		blockingEntities := pos.Entity().GetBlockingEntities()
@@ -74,7 +78,7 @@ func (r Room) updateNewState(pos position.Position, newState [][]entities.RoomEn
 }
 
 func (r Room) moveEntity(pos position.Position, blockingEntities []entities.RoomEntity, newState [][]entities.RoomEntity, command command.Command) position.Position {
-	for r.notAtEdgeOrBlocked(pos, blockingEntities, command) {
+	for r.NotAtEdgeOrBlocked(pos, blockingEntities, command) {
 		if pos.Entity() == entities.Brynjolf && (newState[pos.Row()][pos.Col()] == entities.Guard || newState[pos.Row()][pos.Col()] == entities.Exit) {
 			break
 		}
@@ -83,7 +87,7 @@ func (r Room) moveEntity(pos position.Position, blockingEntities []entities.Room
 	return pos
 }
 
-func (r Room) notAtEdgeOrBlocked(pos position.Position, blockingEntities []entities.RoomEntity, c command.Command) bool {
+func (r Room) NotAtEdgeOrBlocked(pos position.Position, blockingEntities []entities.RoomEntity, c command.Command) bool {
 	switch c {
 	case command.Up:
 		return pos.Row() > 0 && !includes(blockingEntities, r.state[pos.Row() - 1][pos.Col()])
@@ -113,7 +117,7 @@ func (r Room) FindEntitiesPosition(e []entities.RoomEntity) []position.Position 
 	return positions
 }
 
-func (r Room) display(mssg string) {
+func (r Room) Display(mssg string) {
 	fmt.Println(mssg)
 	for _, row := range r.state {
 		for _, entity := range row {
