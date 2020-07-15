@@ -15,7 +15,7 @@ type RoomSimulator struct {
 
 var possibleCommands = []Command{Up, Down, Left, Right}
 var smallestPossibleWayLenth = 0
-var possibleWays = [][]Command{}
+var possibleWays []Command
 
 func commonPosition(positions []Position, brynjolfPosition Position) bool {
 	for _, position := range positions {
@@ -85,15 +85,14 @@ func (rs *RoomSimulator) Simulate(commands []Command) int{
 //assuming length of smallest possible way is less than 2 * height of room
 func (rs *RoomSimulator) findPossibleWays(movableEntitiesPositions []Position, exitPosition []Position) {
 	smallestPossibleWayLenth = 2 * len(rs.room.state)
-	rs.findWays(rs.room, movableEntitiesPositions, exitPosition, []Command{}, 0)
+	rs.findWays(rs.room, movableEntitiesPositions, exitPosition, Command(""), 0)
 	possibleWays = filterWays(possibleWays)
 }
 
-func (rs *RoomSimulator) findWays(room Room, movableEntitiesPositions []Position, exitPosition []Position, previousCommands []Command, levelCount int) {
+func (rs *RoomSimulator) findWays(room Room, movableEntitiesPositions []Position, exitPosition []Position, previousCommands Command, levelCount int) {
 	status := rs.getupdatedStatus(movableEntitiesPositions, exitPosition)
 	if status == Won && len(previousCommands) <= smallestPossibleWayLenth{
-		possibleWays = append(possibleWays, append(previousCommands))
-		fmt.Println(possibleWays)
+		possibleWays = append(possibleWays, previousCommands)
 		smallestPossibleWayLenth = len(previousCommands)
 		return
 	}
@@ -104,7 +103,7 @@ func (rs *RoomSimulator) findWays(room Room, movableEntitiesPositions []Position
 		if necessaryMove(previousCommands, command, status) && movableEntitiesNotBlocked(room, movableEntitiesPositions, command){
 			movableEntitiesPositionsCopy := makeCopy(movableEntitiesPositions)
 			newRoom := room.moveEntities(movableEntitiesPositionsCopy, command)
-			rs.findWays(newRoom, movableEntitiesPositionsCopy, exitPosition, append(previousCommands, command), levelCount + 1)
+			rs.findWays(newRoom, movableEntitiesPositionsCopy, exitPosition, previousCommands + command, levelCount + 1)
 		}
 	}
 }
@@ -115,8 +114,8 @@ func makeCopy(positions []Position) []Position {
 	return duplicate
 }
 
-func filterWays(possibleWays [][]Command) [][]Command {
-	filteredWays := [][]Command{}
+func filterWays(possibleWays []Command) []Command {
+	filteredWays := []Command{}
 	for _, way := range possibleWays {
 		if len(way) == smallestPossibleWayLenth {
 			filteredWays = append(filteredWays, way)
