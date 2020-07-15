@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"legacy-of-brynjolf/command"
 	"legacy-of-brynjolf/entities"
+	"legacy-of-brynjolf/position"
 	"strings"
 )
 
@@ -54,57 +55,57 @@ func (r Room) duplicteRoomState() [][]entities.RoomEntity {
 	return duplicate
 }
 
-func (r Room) moveEntities(positions []Position, command command.Command) Room {
+func (r Room) moveEntities(positions []position.Position, command command.Command) Room {
 	newState := r.duplicteRoomState()
-	for index, position := range positions {
-		blockingEntities := position.entity.GetBlockingEntities()
-		newState[position.row][position.col] = entities.EmptySpace
-		position = r.moveEntity(position, blockingEntities, newState, command)
-		r.updateNewState(position, newState)
-		positions[index] = position
+	for index, pos := range positions {
+		blockingEntities := pos.Entity().GetBlockingEntities()
+		newState[pos.Row()][pos.Col()] = entities.EmptySpace
+		pos = r.moveEntity(pos, blockingEntities, newState, command)
+		r.updateNewState(pos, newState)
+		positions[index] = pos
 	}
 	return Room{newState}
 }
 
-func (r Room) updateNewState(position Position, newState [][]entities.RoomEntity) {
-	if r.state[position.row][position.col] != entities.Exit && !(position.entity == entities.Brynjolf && newState[position.row][position.col] == entities.Guard) {
-		newState[position.row][position.col] = position.entity
+func (r Room) updateNewState(pos position.Position, newState [][]entities.RoomEntity) {
+	if r.state[pos.Row()][pos.Col()] != entities.Exit && !(pos.Entity() == entities.Brynjolf && newState[pos.Row()][pos.Col()] == entities.Guard) {
+		newState[pos.Row()][pos.Col()] = pos.Entity()
 	}
 }
 
-func (r Room) moveEntity(position Position, blockingEntities []entities.RoomEntity, newState [][]entities.RoomEntity, command command.Command) Position {
-	for r.notAtEdgeOrBlocked(position, blockingEntities, command) {
-		if position.entity == entities.Brynjolf && (newState[position.row][position.col] == entities.Guard || newState[position.row][position.col] == entities.Exit) {
+func (r Room) moveEntity(pos position.Position, blockingEntities []entities.RoomEntity, newState [][]entities.RoomEntity, command command.Command) position.Position {
+	for r.notAtEdgeOrBlocked(pos, blockingEntities, command) {
+		if pos.Entity() == entities.Brynjolf && (newState[pos.Row()][pos.Col()] == entities.Guard || newState[pos.Row()][pos.Col()] == entities.Exit) {
 			break
 		}
-		position = position.update(command)
+		pos = pos.Update(command)
 	}
-	return position
+	return pos
 }
 
-func (r Room) notAtEdgeOrBlocked(position Position, blockingEntities []entities.RoomEntity, c command.Command) bool {
+func (r Room) notAtEdgeOrBlocked(pos position.Position, blockingEntities []entities.RoomEntity, c command.Command) bool {
 	switch c {
 	case command.Up:
-		return position.row > 0 && !includes(blockingEntities, r.state[position.row - 1][position.col])
+		return pos.Row() > 0 && !includes(blockingEntities, r.state[pos.Row() - 1][pos.Col()])
 	case command.Down:
-		return position.row < len(r.state) - 1 && !includes(blockingEntities, r.state[position.row + 1][position.col])
+		return pos.Row() < len(r.state) - 1 && !includes(blockingEntities, r.state[pos.Row() + 1][pos.Col()])
 	case command.Left:
-		return position.col > 0 && !includes(blockingEntities, r.state[position.row][position.col - 1])
+		return pos.Col() > 0 && !includes(blockingEntities, r.state[pos.Row()][pos.Col() - 1])
 	case command.Right:
-		return position.col < len(r.state[0]) - 1 && !includes(blockingEntities, r.state[position.row][position.col + 1])
+		return pos.Col() < len(r.state[0]) - 1 && !includes(blockingEntities, r.state[pos.Row()][pos.Col() + 1])
 	}
 	return false
 }
 
-func (r Room) FindEntitiesPosition(e []entities.RoomEntity) []Position{
-	var positions []Position
+func (r Room) FindEntitiesPosition(e []entities.RoomEntity) []position.Position {
+	var positions []position.Position
 	for row, entitiesInRow := range r.state {
 		for col, entity := range entitiesInRow {
 			if includes(e, entity) {
 				if entity == entities.Guard {
-					positions = append([]Position{NewPostion(entity, row, col)}, positions...)
+					positions = append([]position.Position{position.NewPostion(entity, row, col)}, positions...)
 				}else {
-					positions = append(positions, NewPostion(entity, row, col))
+					positions = append(positions, position.NewPostion(entity, row, col))
 				}
 			}
 		}

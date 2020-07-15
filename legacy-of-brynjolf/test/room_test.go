@@ -2,6 +2,7 @@ package test
 
 import (
 	"legacy-of-brynjolf/entities"
+	"legacy-of-brynjolf/position"
 	"legacy-of-brynjolf/simulator"
 	"reflect"
 	"testing"
@@ -13,7 +14,7 @@ var guard = entities.RoomEntity('g')
 var exit = entities.RoomEntity('e')
 
 func TestFindEntitiesPosition(t *testing.T) {
-	checkPositions := func(t *testing.T, got, want []simulator.Position) {
+	checkPositions := func(t *testing.T, got, want []position.Position) {
 		t.Helper()
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v want %v", got, want)
@@ -24,7 +25,7 @@ func TestFindEntitiesPosition(t *testing.T) {
 		data := "0,x,0,x\n0,0,0,e\n0,b,0,0\nx,0,0,0"
 		room, _ := simulator.NewRoom(data)
 		got := room.FindEntitiesPosition([]entities.RoomEntity{brynjolf})
-		want := []simulator.Position{simulator.NewPostion(brynjolf, 2, 1)}
+		want := []position.Position{position.NewPostion(brynjolf, 2, 1)}
 		checkPositions(t, got, want)
 	})
 
@@ -32,7 +33,7 @@ func TestFindEntitiesPosition(t *testing.T) {
 		data := "0,x,0,x\n0,0,0,e\n0,b,g,0\nx,0,0,0"
 		room, _ := simulator.NewRoom(data)
 		got := room.FindEntitiesPosition([]entities.RoomEntity{brynjolf, guard})
-		want := []simulator.Position{simulator.NewPostion(guard, 2, 2),simulator.NewPostion(brynjolf, 2, 1)}
+		want := []position.Position{position.NewPostion(guard, 2, 2), position.NewPostion(brynjolf, 2, 1)}
 		checkPositions(t, got, want)
 	})
 
@@ -40,7 +41,7 @@ func TestFindEntitiesPosition(t *testing.T) {
 		data := "0,x,0,x\n0,0,0,e\n0,b,g,0\nx,0,0,0"
 		room, _ := simulator.NewRoom(data)
 		got := room.FindEntitiesPosition([]entities.RoomEntity{exit})
-		want := []simulator.Position{simulator.NewPostion(exit, 1, 3)}
+		want := []position.Position{position.NewPostion(exit, 1, 3)}
 		checkPositions(t, got, want)
 	})
 }

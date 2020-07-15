@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"legacy-of-brynjolf/command"
 	"legacy-of-brynjolf/entities"
+	"legacy-of-brynjolf/position"
 	status2 "legacy-of-brynjolf/status"
 	"strconv"
 )
@@ -42,7 +43,7 @@ func (rs *RoomSimulator) wonOrLost() bool {
 	return rs.status == status2.Won || rs.status == status2.Lost
 }
 
-func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecuted int, movableEntitiesPositions []Position, exitPosition []Position) int {
+func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecuted int, movableEntitiesPositions []position.Position, exitPosition []position.Position) int {
 	for index, cmd := range commands {
 		commandExecuted = index + 1
 		rs.room = rs.room.moveEntities(movableEntitiesPositions, cmd)

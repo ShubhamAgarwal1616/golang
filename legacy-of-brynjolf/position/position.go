@@ -1,4 +1,4 @@
-package simulator
+package position
 
 import (
 	"legacy-of-brynjolf/command"
@@ -19,6 +19,13 @@ func NewPostion(entity entities.RoomEntity, row int, col int) Position {
 	}
 }
 
+func (p Position) Entity() entities.RoomEntity { return p.entity }
+
+func (p Position) Row() int { return p.row }
+
+func (p Position) Col() int {return p.col }
+
+
 func (p Position) decrementRow() Position {
 	return Position{p.entity, p.row - 1, p.col}
 }
@@ -35,7 +42,7 @@ func (p Position) inclrementCol() Position {
 	return Position{p.entity, p.row, p.col + 1}
 }
 
-func(p Position) update(c command.Command) Position{
+func(p Position) Update(c command.Command) Position {
 	switch c {
 	case command.Up:
 		return p.decrementRow()

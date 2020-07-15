@@ -2,6 +2,7 @@ package simulator
 
 import (
 	"legacy-of-brynjolf/command"
+	"legacy-of-brynjolf/position"
 	"legacy-of-brynjolf/status"
 )
 
@@ -9,10 +10,10 @@ var possibleCommands = []command.Command{command.Up, command.Down, command.Left,
 var smallestPossibleWayLenth = 0
 var possibleWays []command.Command
 
-func movableEntitiesNotBlocked(room Room, positions []Position, command command.Command) bool {
-	for _, position := range positions {
-		blockingEntities := position.entity.GetBlockingEntities()
-		if room.notAtEdgeOrBlocked(position, blockingEntities, command){
+func movableEntitiesNotBlocked(room Room, positions []position.Position, command command.Command) bool {
+	for _, pos := range positions {
+		blockingEntities := pos.Entity().GetBlockingEntities()
+		if room.notAtEdgeOrBlocked(pos, blockingEntities, command){
 			return true
 		}
 	}
@@ -45,16 +46,16 @@ func necessaryMove(previousCommands command.Command, comand command.Command, sta
 	return (!previousMove(previousCommands, comand)) && (!wonOrLost(status)) && (!formingPattern(previousCommands, comand))
 }
 
-func commonPosition(positions []Position, brynjolfPosition Position) bool {
-	for _, position := range positions {
-		if position.row == brynjolfPosition.row && position.col == brynjolfPosition.col{
+func commonPosition(positions []position.Position, brynjolfPosition position.Position) bool {
+	for _, pos := range positions {
+		if pos.Row() == brynjolfPosition.Row() && pos.Col() == brynjolfPosition.Col(){
 			return true
 		}
 	}
 	return false
 }
 
-func getRoomStatus(movableEntitiesPositions []Position, exitPosition []Position) status.RoomStatus {
+func getRoomStatus(movableEntitiesPositions []position.Position, exitPosition []position.Position) status.RoomStatus {
 	brynjolfPosition := movableEntitiesPositions[len(movableEntitiesPositions) - 1]
 	guardsPositions := movableEntitiesPositions[0:len(movableEntitiesPositions) - 1]
 	if commonPosition(guardsPositions, brynjolfPosition){
@@ -67,13 +68,13 @@ func getRoomStatus(movableEntitiesPositions []Position, exitPosition []Position)
 
 
 //assuming length of smallest possible way is less than 2 * height of room
-func findPossibleWays(rs RoomSimulator, movableEntitiesPositions []Position, exitPosition []Position) []command.Command {
+func findPossibleWays(rs RoomSimulator, movableEntitiesPositions []position.Position, exitPosition []position.Position) []command.Command {
 	smallestPossibleWayLenth = 2 * len(rs.room.state)
 	findWays(rs.room, movableEntitiesPositions, exitPosition, "", 0)
 	return filterWays(possibleWays)
 }
 
-func findWays(room Room, movableEntitiesPositions []Position, exitPosition []Position, previousCommands command.Command, levelCount int) {
+func findWays(room Room, movableEntitiesPositions []position.Position, exitPosition []position.Position, previousCommands command.Command, levelCount int) {
 	newStatus := getRoomStatus(movableEntitiesPositions, exitPosition)
 	if newStatus == status.Won && len(previousCommands) <= smallestPossibleWayLenth {
 		possibleWays = append(possibleWays, previousCommands)
@@ -92,8 +93,8 @@ func findWays(room Room, movableEntitiesPositions []Position, exitPosition []Pos
 	}
 }
 
-func makeCopy(positions []Position) []Position {
-	duplicate := make([]Position, len(positions))
+func makeCopy(positions []position.Position) []position.Position {
+	duplicate := make([]position.Position, len(positions))
 	copy(duplicate, positions)
 	return duplicate
 }
