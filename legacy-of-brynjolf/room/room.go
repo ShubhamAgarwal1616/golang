@@ -3,125 +3,110 @@ package room
 import (
 	"fmt"
 	"legacy-of-brynjolf/command"
-	"legacy-of-brynjolf/position"
-	"legacy-of-brynjolf/room/entities"
+	_blocks "legacy-of-brynjolf/room/blocks"
+	_entities "legacy-of-brynjolf/room/entities"
 	"strings"
 )
 
 type Room struct {
-	state [][]entities.Entity
+	blocks [][]_blocks.Block
 }
 
-func buildRow(cols []string) ([]entities.Entity, error) {
-	var entityRow []entities.Entity
-	for _, entity := range cols {
-		entity, err := entities.BuildEntity(entity)
-		if err != nil {
-			return nil, err
-		}
-		entityRow = append(entityRow, entity)
-	}
-	return entityRow, nil
-}
 
 func NewRoom(data string) (Room, error) {
-	var state [][]entities.Entity
+	var blocks [][]_blocks.Block
 	rows := strings.Split(strings.TrimSpace(data), "\n")
-	for _, row := range rows {
-		entityRow, err := buildRow(strings.Split(strings.TrimSpace(row), ","))
+	for index, row := range rows {
+		blocksRow, err := _blocks.BuildRow(strings.Split(strings.TrimSpace(row), ","), index)
 		if err != nil{
 			return Room{}, err
 		}
-		state = append(state, entityRow)
+		blocks = append(blocks, blocksRow)
 	}
-	return Room{state: state}, nil
-}
-
-func includes(entities []entities.Entity, entity entities.Entity) bool {
-	for _, e := range entities{
-		if e == entity{
-			return true
-		}
-	}
-	return false
+	return Room{blocks: blocks}, nil
 }
 
 func (r Room) Size() int {
-	return len(r.state)
+	return len(r.blocks)
 }
 
-func (r Room) duplicteRoomState() [][]entities.Entity {
-	duplicate := make([][]entities.Entity, len(r.state))
-	for index := range r.state {
-		duplicate[index] = make([]entities.Entity, len(r.state[index]))
-		copy(duplicate[index], r.state[index])
+func (r Room) duplicateRoomBlocks() [][]_blocks.Block {
+	duplicate := make([][]_blocks.Block, len(r.blocks))
+	for index := range r.blocks {
+		duplicate[index] = make([]_blocks.Block, len(r.blocks[index]))
+		copy(duplicate[index], r.blocks[index])
 	}
 	return duplicate
 }
 
-func (r Room) MoveEntities(positions []position.Position, command command.Command) Room {
-	newState := r.duplicteRoomState()
-	for index, pos := range positions {
-		blockingEntities := pos.Entity().GetBlockingEntities()
-		newState[pos.Row()][pos.Col()] = entities.EmptySpace
-		pos = r.moveEntity(pos, blockingEntities, newState, command)
-		r.updateNewState(pos, newState)
-		positions[index] = pos
+func (r Room) MoveEntities(movingBlocks []_blocks.Block, command command.Command) Room {
+	newBlocks := r.duplicateRoomBlocks()
+	for index, block := range movingBlocks {
+		blockingEntities := block.Entity().GetBlockingEntities()
+		newBlocks[block.Pos().Row()][block.Pos().Col()].UpdateEntity(_entities.EmptySpace)
+		r.moveEntity(&block, blockingEntities, newBlocks, command)
+		r.updateNewBlocks(block, newBlocks)
+		movingBlocks[index] = block
 	}
-	return Room{newState}
+	return Room{newBlocks}
 }
 
-func (r Room) updateNewState(pos position.Position, newState [][]entities.Entity) {
-	if r.state[pos.Row()][pos.Col()] != entities.Exit && !(pos.Entity() == entities.Brynjolf && newState[pos.Row()][pos.Col()] == entities.Guard) {
-		newState[pos.Row()][pos.Col()] = pos.Entity()
+func (r Room) updateNewBlocks(block _blocks.Block, newBlocks [][]_blocks.Block) {
+	oldBlock := r.blocks[block.Pos().Row()][block.Pos().Col()]
+	newBlock := &newBlocks[block.Pos().Row()][block.Pos().Col()]
+	if !oldBlock.IsExit() && !(block.IsBrynjolf() && newBlock.IsGuard()) {
+		newBlock.UpdateEntity(block.Entity())
 	}
 }
 
-func (r Room) moveEntity(pos position.Position, blockingEntities []entities.Entity, newState [][]entities.Entity, command command.Command) position.Position {
-	for r.NotAtEdgeOrBlocked(pos, blockingEntities, command) {
-		if pos.Entity() == entities.Brynjolf && (newState[pos.Row()][pos.Col()] == entities.Guard || newState[pos.Row()][pos.Col()] == entities.Exit) {
+func (r Room) moveEntity(block *_blocks.Block, blockingEntities []_entities.Entity, newBlocks [][]_blocks.Block, command command.Command) {
+	for r.NotAtEdgeOrBlocked(*block, blockingEntities, command) {
+		if block.IsBrynjolf() && (newBlocks[block.Pos().Row()][block.Pos().Col()].IsGuard() || newBlocks[block.Pos().Row()][block.Pos().Col()].IsExit()) {
 			break
 		}
-		pos = pos.Update(command)
+		block.UpdatePos(command)
 	}
-	return pos
 }
 
-func (r Room) NotAtEdgeOrBlocked(pos position.Position, blockingEntities []entities.Entity, c command.Command) bool {
+func (r Room) notBlocked(row int, col int, blockingEntities []_entities.Entity) bool {
+	return !r.blocks[row][col].Includes(blockingEntities)
+}
+
+func (r Room) NotAtEdgeOrBlocked(b _blocks.Block, blockingEntities []_entities.Entity, c command.Command) bool {
 	switch c {
 	case command.Up:
-		return pos.Row() > 0 && !includes(blockingEntities, r.state[pos.Row() - 1][pos.Col()])
+		return b.Pos().Row() > 0 && r.notBlocked(b.Pos().Row() - 1, b.Pos().Col(), blockingEntities)
 	case command.Down:
-		return pos.Row() < len(r.state) - 1 && !includes(blockingEntities, r.state[pos.Row() + 1][pos.Col()])
+		return b.Pos().Row() < len(r.blocks) - 1 && r.notBlocked(b.Pos().Row() + 1, b.Pos().Col(), blockingEntities)
 	case command.Left:
-		return pos.Col() > 0 && !includes(blockingEntities, r.state[pos.Row()][pos.Col() - 1])
+		return b.Pos().Col() > 0 && r.notBlocked(b.Pos().Row(), b.Pos().Col() - 1, blockingEntities)
 	case command.Right:
-		return pos.Col() < len(r.state[0]) - 1 && !includes(blockingEntities, r.state[pos.Row()][pos.Col() + 1])
+		return b.Pos().Col() < len(r.blocks[0]) - 1 && r.notBlocked(b.Pos().Row(), b.Pos().Col() + 1, blockingEntities)
 	}
 	return false
 }
 
-func (r Room) FindEntitiesPosition(e []entities.Entity) []position.Position {
-	var positions []position.Position
-	for row, entitiesInRow := range r.state {
-		for col, entity := range entitiesInRow {
-			if includes(e, entity) {
-				if entity == entities.Guard {
-					positions = append([]position.Position{position.NewPostion(entity, row, col)}, positions...)
+func (r Room) GetBlocks(entities []_entities.Entity) []_blocks.Block {
+	var blocks []_blocks.Block
+	for _, blocksRow := range r.blocks {
+		for _, block := range blocksRow {
+			if block.Includes(entities) {
+				if block.IsGuard() {
+					blocks = append([]_blocks.Block{block}, blocks...)
 				}else {
-					positions = append(positions, position.NewPostion(entity, row, col))
+					blocks = append(blocks, block)
 				}
 			}
 		}
 	}
-	return positions
+	return blocks
 }
 
 func (r Room) Display(mssg string) {
 	fmt.Println(mssg)
-	for _, row := range r.state {
-		for _, entity := range row {
-			fmt.Print(entity + ",")
+	for _, row := range r.blocks {
+		for _, block := range row {
+			block.Display()
 		}
 		fmt.Print("\n")
 	}

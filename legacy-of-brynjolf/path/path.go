@@ -2,8 +2,8 @@ package path
 
 import (
 	"legacy-of-brynjolf/command"
-	"legacy-of-brynjolf/position"
 	_room "legacy-of-brynjolf/room"
+	_blocks "legacy-of-brynjolf/room/blocks"
 	"legacy-of-brynjolf/status"
 )
 
@@ -11,10 +11,10 @@ var possibleCommands = []command.Command{command.Up, command.Down, command.Left,
 var smallestPossibleWayLenth = 0
 var possibleWays []command.Command
 
-func movableEntitiesNotBlocked(room _room.Room, positions []position.Position, command command.Command) bool {
-	for _, pos := range positions {
-		blockingEntities := pos.Entity().GetBlockingEntities()
-		if room.NotAtEdgeOrBlocked(pos, blockingEntities, command){
+func movableEntitiesNotBlocked(room _room.Room, blocks []_blocks.Block, command command.Command) bool {
+	for _, block := range blocks {
+		blockingEntities := block.Entity().GetBlockingEntities()
+		if room.NotAtEdgeOrBlocked(block, blockingEntities, command){
 			return true
 		}
 	}
@@ -47,21 +47,21 @@ func necessaryMove(previousCommands command.Command, comand command.Command, sta
 	return (!previousMove(previousCommands, comand)) && (!wonOrLost(status)) && (!formingPattern(previousCommands, comand))
 }
 
-func commonPosition(positions []position.Position, brynjolfPosition position.Position) bool {
-	for _, pos := range positions {
-		if pos.Row() == brynjolfPosition.Row() && pos.Col() == brynjolfPosition.Col(){
+func commonPosition(blocks []_blocks.Block, brynjolfBlock _blocks.Block) bool {
+	for _, block := range blocks {
+		if block.SamePosition(brynjolfBlock){
 			return true
 		}
 	}
 	return false
 }
 
-func GetRoomStatus(movableEntitiesPositions []position.Position, exitPosition []position.Position) status.RoomStatus {
-	brynjolfPosition := movableEntitiesPositions[len(movableEntitiesPositions) - 1]
-	guardsPositions := movableEntitiesPositions[0:len(movableEntitiesPositions) - 1]
-	if commonPosition(guardsPositions, brynjolfPosition){
+func GetRoomStatus(movableEntitiesBlocks []_blocks.Block, exitBlock []_blocks.Block) status.RoomStatus {
+	brynjolfBlock := movableEntitiesBlocks[len(movableEntitiesBlocks) - 1]
+	guardBlocks := movableEntitiesBlocks[0:len(movableEntitiesBlocks) - 1]
+	if commonPosition(guardBlocks, brynjolfBlock){
 		return status.Lost
-	}else if commonPosition(exitPosition, brynjolfPosition) {
+	}else if commonPosition(exitBlock, brynjolfBlock) {
 		return status.Won
 	}
 	return status.Undecided
@@ -69,14 +69,14 @@ func GetRoomStatus(movableEntitiesPositions []position.Position, exitPosition []
 
 
 //assuming length of smallest possible way is less than 2 * height of room
-func FindPossibleWays(room _room.Room, movableEntitiesPositions []position.Position, exitPosition []position.Position) []command.Command {
+func FindPossibleWays(room _room.Room, movableEntitiesBlocks []_blocks.Block, exitBlock []_blocks.Block) []command.Command {
 	smallestPossibleWayLenth = 2 * room.Size()
-	findWays(room, movableEntitiesPositions, exitPosition, "", 0)
+	findWays(room, movableEntitiesBlocks, exitBlock, "", 0)
 	return filterWays(possibleWays)
 }
 
-func findWays(room _room.Room, movableEntitiesPositions []position.Position, exitPosition []position.Position, previousCommands command.Command, levelCount int) {
-	newStatus := GetRoomStatus(movableEntitiesPositions, exitPosition)
+func findWays(room _room.Room, movableEntitiesBlocks []_blocks.Block, exitBlock []_blocks.Block, previousCommands command.Command, levelCount int) {
+	newStatus := GetRoomStatus(movableEntitiesBlocks, exitBlock)
 	if newStatus == status.Won && len(previousCommands) <= smallestPossibleWayLenth {
 		possibleWays = append(possibleWays, previousCommands)
 		smallestPossibleWayLenth = len(previousCommands)
@@ -86,16 +86,16 @@ func findWays(room _room.Room, movableEntitiesPositions []position.Position, exi
 	if levelCount > smallestPossibleWayLenth {return}
 
 	for _, cmd := range possibleCommands {
-		if necessaryMove(previousCommands, cmd, newStatus) && movableEntitiesNotBlocked(room, movableEntitiesPositions, cmd){
-			movableEntitiesPositionsCopy := makeCopy(movableEntitiesPositions)
-			newRoom := room.MoveEntities(movableEntitiesPositionsCopy, cmd)
-			findWays(newRoom, movableEntitiesPositionsCopy, exitPosition, previousCommands +cmd, levelCount + 1)
+		if necessaryMove(previousCommands, cmd, newStatus) && movableEntitiesNotBlocked(room, movableEntitiesBlocks, cmd){
+			movableEntitiesBlocksCopy := makeCopy(movableEntitiesBlocks)
+			newRoom := room.MoveEntities(movableEntitiesBlocksCopy, cmd)
+			findWays(newRoom, movableEntitiesBlocksCopy, exitBlock, previousCommands +cmd, levelCount + 1)
 		}
 	}
 }
 
-func makeCopy(positions []position.Position) []position.Position {
-	duplicate := make([]position.Position, len(positions))
+func makeCopy(positions []_blocks.Block) []_blocks.Block {
+	duplicate := make([]_blocks.Block, len(positions))
 	copy(duplicate, positions)
 	return duplicate
 }
