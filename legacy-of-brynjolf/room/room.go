@@ -86,7 +86,7 @@ func (r Room) NotAtEdgeOrBlocked(b _blocks.Block, blockingEntities []_entities.E
 	return false
 }
 
-func (r Room) FindBlocks(entities []_entities.Entity) []_blocks.Block {
+func (r Room) GetBlocks(entities []_entities.Entity) []_blocks.Block {
 	var blocks []_blocks.Block
 	for _, blocksRow := range r.blocks {
 		for _, block := range blocksRow {

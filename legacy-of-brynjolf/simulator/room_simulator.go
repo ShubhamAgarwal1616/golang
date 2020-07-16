@@ -60,8 +60,8 @@ func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecu
 }
 
 func (rs *RoomSimulator) Start(commands []command.Command) (int, []command.Command){
-	movableEntitiesBlocks := rs.room.FindBlocks(movableEntities)
-	exitBlock := rs.room.FindBlocks([]entities.Entity{entities.Exit})
+	movableEntitiesBlocks := rs.room.GetBlocks(movableEntities)
+	exitBlock := rs.room.GetBlocks([]entities.Entity{entities.Exit})
 	var commandsExecuted int
 	commandsExecuted = rs.executeCommand(commands, commandsExecuted, movableEntitiesBlocks, exitBlock)
 	var ways []command.Command
