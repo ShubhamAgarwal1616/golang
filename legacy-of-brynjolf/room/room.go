@@ -45,13 +45,13 @@ func (r Room) MoveEntities(movingBlocks []_blocks.Block, command command.Command
 		blockingEntities := block.Entity().GetBlockingEntities()
 		newBlocks[block.Pos().Row()][block.Pos().Col()].UpdateEntity(_entities.EmptySpace)
 		r.moveEntity(&block, blockingEntities, newBlocks, command)
-		r.updateNewState(block, newBlocks)
+		r.updateNewBlocks(block, newBlocks)
 		movingBlocks[index] = block
 	}
 	return Room{newBlocks}
 }
 
-func (r Room) updateNewState(block _blocks.Block, newBlocks [][]_blocks.Block) {
+func (r Room) updateNewBlocks(block _blocks.Block, newBlocks [][]_blocks.Block) {
 	oldBlock := r.blocks[block.Pos().Row()][block.Pos().Col()]
 	newBlock := &newBlocks[block.Pos().Row()][block.Pos().Col()]
 	if !oldBlock.IsExit() && !(block.IsBrynjolf() && newBlock.IsGuard()) {
@@ -68,20 +68,20 @@ func (r Room) moveEntity(block *_blocks.Block, blockingEntities []_entities.Enti
 	}
 }
 
+func (r Room) notBlocked(row int, col int, blockingEntities []_entities.Entity) bool {
+	return !r.blocks[row][col].Includes(blockingEntities)
+}
+
 func (r Room) NotAtEdgeOrBlocked(b _blocks.Block, blockingEntities []_entities.Entity, c command.Command) bool {
 	switch c {
 	case command.Up:
-		block := r.blocks[b.Pos().Row() - 1][b.Pos().Col()]
-		return b.Pos().Row() > 0 && !block.Includes(blockingEntities)
+		return b.Pos().Row() > 0 && r.notBlocked(b.Pos().Row() - 1, b.Pos().Col(), blockingEntities)
 	case command.Down:
-		block := r.blocks[b.Pos().Row() + 1][b.Pos().Col()]
-		return b.Pos().Row() < len(r.blocks) - 1 && !block.Includes(blockingEntities)
+		return b.Pos().Row() < len(r.blocks) - 1 && r.notBlocked(b.Pos().Row() + 1, b.Pos().Col(), blockingEntities)
 	case command.Left:
-		block := r.blocks[b.Pos().Row()][b.Pos().Col() - 1]
-		return b.Pos().Col() > 0 && !block.Includes(blockingEntities)
+		return b.Pos().Col() > 0 && r.notBlocked(b.Pos().Row(), b.Pos().Col() - 1, blockingEntities)
 	case command.Right:
-		block := r.blocks[b.Pos().Row()][b.Pos().Col() + 1]
-		return b.Pos().Col() < len(r.blocks[0]) - 1 && !block.Includes(blockingEntities)
+		return b.Pos().Col() < len(r.blocks[0]) - 1 && r.notBlocked(b.Pos().Row(), b.Pos().Col() + 1, blockingEntities)
 	}
 	return false
 }

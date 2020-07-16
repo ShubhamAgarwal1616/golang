@@ -65,8 +65,8 @@ func (rs *RoomSimulator) Start(commands []command.Command) (int, []command.Comma
 	var commandsExecuted int
 	commandsExecuted = rs.executeCommand(commands, commandsExecuted, movableEntitiesBlocks, exitBlock)
 	var ways []command.Command
-	//if !rs.wonOrLost() {
-	//	ways = path.FindPossibleWays(rs.room, movableEntitiesBlocks, exitBlock)
-	//}
+	if !rs.wonOrLost() {
+		ways = path.FindPossibleWays(rs.room, movableEntitiesBlocks, exitBlock)
+	}
 	return commandsExecuted, ways
 }
