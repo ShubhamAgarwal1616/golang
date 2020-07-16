@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"legacy-of-brynjolf/command"
 	"legacy-of-brynjolf/path"
-	"legacy-of-brynjolf/position"
 	room2 "legacy-of-brynjolf/room"
+	"legacy-of-brynjolf/room/blocks"
 	"legacy-of-brynjolf/room/entities"
 	status2 "legacy-of-brynjolf/status"
 	"strconv"
 )
+
+var movableEntities = []entities.Entity{entities.Guard, entities.Brynjolf}
 
 type RoomSimulator struct {
 	room   room2.Room
@@ -45,11 +47,11 @@ func (rs *RoomSimulator) wonOrLost() bool {
 	return rs.status == status2.Won || rs.status == status2.Lost
 }
 
-func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecuted int, movableEntitiesPositions []position.Position, exitPosition []position.Position) int {
+func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecuted int, movableEntitieBlocks []blocks.Block, exitBlock []blocks.Block) int {
 	for index, cmd := range commands {
 		commandExecuted = index + 1
-		rs.room = rs.room.MoveEntities(movableEntitiesPositions, cmd)
-		rs.status = path.GetRoomStatus(movableEntitiesPositions, exitPosition)
+		rs.room = rs.room.MoveEntities(movableEntitieBlocks, cmd)
+		rs.status = path.GetRoomStatus(movableEntitieBlocks, exitBlock)
 		if rs.wonOrLost() {
 			break
 		}
@@ -58,13 +60,13 @@ func (rs *RoomSimulator) executeCommand(commands []command.Command, commandExecu
 }
 
 func (rs *RoomSimulator) Start(commands []command.Command) (int, []command.Command){
-	movableEntitiesPositions := rs.room.FindEntitiesPosition([]entities.Entity{entities.Guard, entities.Brynjolf})
-	exitPosition := rs.room.FindEntitiesPosition([]entities.Entity{entities.Exit})
+	movableEntitiesBlocks := rs.room.FindBlocks(movableEntities)
+	exitBlock := rs.room.FindBlocks([]entities.Entity{entities.Exit})
 	var commandsExecuted int
-	commandsExecuted = rs.executeCommand(commands, commandsExecuted, movableEntitiesPositions, exitPosition)
+	commandsExecuted = rs.executeCommand(commands, commandsExecuted, movableEntitiesBlocks, exitBlock)
 	var ways []command.Command
-	if !rs.wonOrLost() {
-		ways = path.FindPossibleWays(rs.room, movableEntitiesPositions, exitPosition)
-	}
+	//if !rs.wonOrLost() {
+	//	ways = path.FindPossibleWays(rs.room, movableEntitiesBlocks, exitBlock)
+	//}
 	return commandsExecuted, ways
 }
